@@ -19,33 +19,54 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2014-11-29/FileSaver.min.js"></script>
     {# For alert#}
     <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <style>
+        .project-meta .control-label { padding-top: 7px; }
+        .project-meta .form-control-static { min-height: 0; }
+        .notes-box { white-space: pre-line; color: #555; max-height: 7em; overflow-y: auto;
+                     padding: 4px 8px; border: 1px solid #ddd; border-radius: 3px; background: #fafafa; }
+        .project-notes .notes-box { max-height: 5em; }
+        .exp-notes { min-width: 20em; max-width: 28em; font-size: 90%; }
+        .exp-notes .notes-box { max-height: 5em; }
+        .admin-editable { border-bottom: 1px dotted #999; cursor: help; }
+    </style>
 {% endblock %}
 
 {% block content %}
 
+    {% comment %}
+        Project fields are read-only here: they are owned by Django admin
+        (/admin/ale/project/<id>/change/). The description is the project-level note.
+    {% endcomment %}
     <div class="row">
-        <form class="container">
+        <div class="container project-meta">
             <div class="form-group row">
-                <label for="name" class="col-sm-2 col-form-label text-right">Project Name:</label>
-                <div class="col-sm-3">
-                    <input type="text" value="{{ project.name }}" name="name" class="form-control" id="name">
-                </div>
-                <label for="date" class="col-sm-2 col-form-label text-right">Created Date:</label>
-                <div class="col-sm-3">
-                    <input type="date" value="{{ project.date_str }}" name="user" class="form-control" id="date">
-                </div>
+                <label class="col-sm-2 control-label text-right">Project Name:</label>
+                <div class="col-sm-3"><p class="form-control-static">{{ project.name }}</p></div>
+                <label class="col-sm-2 control-label text-right">Created Date:</label>
+                <div class="col-sm-3"><p class="form-control-static">{{ project.date_str }}</p></div>
             </div>
             <div class="form-group row">
-                <label for="user" class="col-sm-2 col-form-label text-right">Owner Name:</label>
-                <div class="col-sm-3">
-                    <input type="text" value="{{ project.owner }}" name="user" class="form-control" id="user">
-                </div>
-                <label for="public" class="col-sm-2 col-form-label text-right">Is public?</label>
-                <div class="col-sm-3">
-                    <input type="text" value="{{ project.is_public }}" name="public" class="form-control" id="public">
+                <label class="col-sm-2 control-label text-right">Owner Name:</label>
+                <div class="col-sm-3"><p class="form-control-static">{{ project.owner }}</p></div>
+                <label class="col-sm-2 control-label text-right">Is public?</label>
+                <div class="col-sm-3"><p class="form-control-static">{% if project.is_public %}Yes{% else %}No{% endif %}</p></div>
+            </div>
+            <div class="form-group row">
+                <label class="col-sm-2 control-label text-right">Status:</label>
+                <div class="col-sm-3"><p class="form-control-static">{{ project.get_status_display }}</p></div>
+                <label class="col-sm-2 control-label text-right">
+                    <span class="admin-editable"
+                          title="Project notes. Site admins can change this field in Django admin (Ale &rsaquo; Projects).">Notes:</span>
+                </label>
+                <div class="col-sm-5 project-notes">
+                    <div class="notes-box">{% if project.description %}{{ project.description }}{% else %}<em>none</em>{% endif %}</div>
+                    {% if user.is_staff %}
+                        <a href="/admin/ale/project/{{ project.id }}/change/" title="Edit this project in Django admin">
+                            <i class="fa fa-pencil" aria-hidden="true"></i> edit</a>
+                    {% endif %}
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 
     <div class="row">
@@ -64,6 +85,8 @@
                 <th>Project</th>
                 <th>Publication</th>
                 <th>Date</th>
+                <th><span class="admin-editable"
+                          title="Experiment notes. Site admins can change this field in Django admin (Ale &rsaquo; Experiments).">Notes</span></th>
             </tr>
             </thead>
             <tbody>
@@ -83,6 +106,9 @@
                         {% endfor %}
                     </td>
                     <td>{{ experiment.date }}</td>
+                    <td class="exp-notes">{% if experiment.notes %}<div class="notes-box">{{ experiment.notes }}</div>{% endif %}{% if user.is_staff %}
+                        <a href="/admin/ale/aleexperiment/{{ experiment.ale_id }}/change/" title="Edit this experiment in Django admin">
+                            <i class="fa fa-pencil" aria-hidden="true"></i></a>{% endif %}</td>
                 </tr>
             {% endfor %}
             </tbody>
