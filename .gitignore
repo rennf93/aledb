@@ -51,3 +51,6 @@ core
 
 # Host config mirror: the journald drop-in must be tracked despite the *.conf rule above.
 !/ops/host/etc/systemd/journald.conf.d/aledb.conf
+
+# scratch files shared by hand (may hold private experiment detail)
+/tmp/
