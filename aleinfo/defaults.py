@@ -124,7 +124,7 @@ CHANNEL_LAYERS = {
 }
 
 MIDDLEWARE = (
-    'djangoapi_guard.middleware.DjangoAPIGuard',
+    'aleinfo.guard_middleware.AleDBGuardMiddleware',
     # Application-layer defense against automated traffic (see issue #84:
     # 3.32M requests in a month, ~96% automated, incl. a residential-proxy
     # scraping operation spread over 433k one-shot IPs on /mutations/details).
